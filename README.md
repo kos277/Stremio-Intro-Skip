@@ -1,29 +1,25 @@
-# Stremio Intro Skip — macOS / official Stremio
+# Stremio Intro Skip
 
-A small **Hammerspoon** utility that adds a Netflix-inspired **SKIP INTRO | ⚙** overlay to the **official Stremio 5 desktop app on macOS**. It automatically appears during the beginning of a video, counts down, and seeks to a user-configured time using Stremio's existing timeline. It works independently of the show or content source and skips automatically after setup. You choose the intro endpoint; the script does not detect intro boundaries. The official Stremio player is unchanged.
+Automatically skip to your chosen intro endpoint in **Stremio on macOS**. A small **SKIP INTRO | ⚙** button lets you skip immediately or change the time.
 
-**Documented stable baseline:** 1.0.0 (project documentation label), verified by the user on **Stremio 5.1.28**, October 2026. User-reported environment: **Hammerspoon 1.1.1 (6936)** and **macOS Tahoe 26.7**. See [PROJECT_STATE.md](PROJECT_STATE.md) for design decisions, architecture, limitations, and troubleshooting.
+**New Mac?** Follow steps 1–3. **New screen or resolution?** Repeat step 2, then test with step 3.
 
-> **Keep your own working `~/.hammerspoon/init.lua` as the primary source of truth.** The repository’s `init.lua` is the working script supplied by the user, with a 2-second hide delay. Before replacing an already-working installation, back up and compare the local file.
+## 1. Install
 
-## How to install or restore
+1. Install [Stremio for macOS](https://www.stremio.com/downloads) and [Hammerspoon](https://www.hammerspoon.org/).
+2. Open Hammerspoon. Allow it under **System Settings → Privacy & Security → Accessibility**. Quit and reopen Hammerspoon if prompted.
+3. Open [init.lua](init.lua) here on GitHub and click **Download raw file** near the top-right of the file. Keep the filename **init.lua**.
+4. In Finder, press **Command + Shift + G**, enter `~/.hammerspoon`, and put the downloaded file in that folder. Create the folder if needed. **Back up an existing `init.lua` before replacing it.** If it contains other Hammerspoon tools, merge this script instead.
+5. Click Hammerspoon’s menu bar icon → **Reload Config**. Keep Hammerspoon running.
 
-1. Install the **official Stremio desktop app** for macOS and [Hammerspoon](https://www.hammerspoon.org/). This was tested with **Stremio 5.1.28**; newer Stremio versions may need adjustment.
-2. Open Hammerspoon once. Under **System Settings → Privacy & Security → Accessibility**, allow Hammerspoon to control your Mac; macOS may require you to quit and reopen it. Keep Hammerspoon running in the menu bar.
-3. In Finder, choose **Go → Go to Folder…**, enter `~/.hammerspoon`, and open `init.lua`. If it doesn't exist, create a plain-text file with that exact name.
-4. **Back up any existing `init.lua` first.** Copy the project's `init.lua` into `~/.hammerspoon/init.lua`. If you already use other Hammerspoon automation, do not overwrite it blindly—merge the code and check for shortcut conflicts.
-5. From Hammerspoon's menu bar icon, select **Reload Config**. Check the Hammerspoon Console if it reports a Lua error.
-6. If your old Hammerspoon preferences survived, the saved skip timestamp and seek-bar calibration may still work. **On a fresh installation or a different screen, calibrate the seek bar below.**
-7. Play an episode in **fullscreen official Stremio**. The overlay should appear before your saved intro endpoint, then automatically skip after its countdown.
+## 2. Set up your screen
 
-### First-time seek-bar calibration
+Do this once for each new Mac, screen, resolution, or display layout. You’ll mark both ends of Stremio’s playback bar so the script knows where to click.
 
-The script clicks a calculated point on Stremio's native timeline; it needs the actual screen coordinates of the **beginning** and **end** of the seek bar. They are stored by Hammerspoon, not in `init.lua`.
-
-For a first-time setup, temporarily append this helper to the **bottom of `~/.hammerspoon/init.lua`** and reload:
+1. Click Hammerspoon’s menu bar icon → **Open Config**. Paste the block below at the **bottom** of `init.lua`, save, then choose **Reload Config**.
 
 ```lua
--- TEMPORARY SEEK BAR CALIBRATION (remove after setup)
+-- Screen setup shortcuts
 hs.hotkey.bind({"ctrl", "alt", "cmd"}, "1", function()
     hs.settings.set("onepace_seek_start", hs.mouse.absolutePosition())
     hs.alert.show("Seek bar START saved")
@@ -35,67 +31,33 @@ hs.hotkey.bind({"ctrl", "alt", "cmd"}, "2", function()
 end)
 ```
 
-1. Play an episode fullscreen and seek **past the intro** first, so the overlay is hidden and cannot cover the bar.
-2. Move the pointer to the **very beginning of the seek bar** without clicking; press **Control + Option + Command + 1**.
-3. Move it to the **very end of the seek bar** without clicking; press **Control + Option + Command + 2**.
-4. Remove the temporary calibration helper (optional, but recommended), **save and reload** Hammerspoon so the overlay can reposition using the stored coordinates.
-5. Rewind the episode to the beginning and test a manual or automatic skip. If it clicks the wrong location, recalibrate and reload again.
+2. Play a video in **fullscreen Stremio on the screen you’ll use**. Seek well past the intro so the skip button disappears. Move the mouse to show the playback bar.
+3. Point at the **far-left end of the playback bar** without clicking. Press **Control + Option + Command + 1**. You should see **Seek bar START saved**.
+4. Point at the **far-right end of the same bar** without clicking. Press **Control + Option + Command + 2**. You should see **Seek bar END saved**.
+5. Choose **Reload Config** again. This moves the skip button into position for your screen.
 
-The start position should be to the left of the end position. Recalibrate after changing display, resolution, scaling, or Stremio window geometry if seeking becomes inaccurate.
+Use the long **video progress bar**, not the volume slider. You can leave the setup shortcuts in the file; next time you change screens, repeat steps 2–5. Don’t paste the block twice.
 
-## Everyday use
+## 3. Choose the time and test
 
-- At the start of a video, the button appears when playback is **before your configured intro endpoint**. Detection occurs on a **4-second interval**.
-- It displays **SKIP INTRO** for ~1 second, then **SKIP IN 3 → 2 → 1** for one second each; clicking the main area skips immediately.
-- At the end of the countdown, it seeks automatically and displays **SKIPPING...** for **2 seconds** before hiding. The 2 seconds is a fixed visual delay, *not* playback-completion detection.
-- Click the **⚙ cog** to edit the target (e.g. `1:42`, `2:30`, `3:15`). The countdown is suspended during editing and restarts after returning to Stremio.
-- The target is remembered across restarts. The current target **might not** be `1:42`; that is only the *initial fallback* when no value has been saved.
-- The overlay hides when the intro is over or Stremio isn't the foreground application. Rewinding into the intro can trigger the auto-skip sequence again; the code does **not** identify episodes by title.
+1. With Stremio open, press **Control + Option + Command + E**.
+2. Enter the time where the intro ends, such as **1:42**, and click **Save**. This time is remembered and applies to all videos until you change it.
+3. Rewind to the beginning and let the video play. Within about four seconds, you should see **SKIP INTRO**, then **SKIP IN 3 → 2 → 1**. It should jump to your chosen time and hide.
 
-### Shortcuts
+**That’s it.** Click the button to skip sooner, or click **⚙** to change the time. The endpoint is set by you; the script doesn’t find intro boundaries automatically.
 
-| Shortcut | Action |
+To start Hammerspoon automatically after restarting your Mac, enable **Launch at Login** in its preferences.
+
+## If something doesn’t work
+
+| Problem | What to do |
 | --- | --- |
-| **Ctrl + Option + Command + E** | Edit the skip timestamp, including when the overlay is hidden |
-| **Ctrl + Option + Command + P** | Debug: show timestamps exposed by Stremio Accessibility |
-| **Ctrl + Option + Command + 0** | Manually toggle overlay visibility (auto-monitor may override this on a later scan) |
-| **Ctrl + Option + Command + 1 / 2** | Only if the **temporary calibration helper** has been added: capture seek-bar start / end |
+| It clicks the wrong place or skips to the wrong time | Repeat **step 2** on your current screen, then check your saved time with **Control + Option + Command + E**. |
+| No skip button | Keep Hammerspoon running, check its Accessibility permission, and choose **Reload Config**. Play a video longer than three minutes from the beginning with Stremio in front. |
+| An error appears when reloading | Open Hammerspoon’s **Console** and copy the error when asking for help. |
 
-## Change the timings
+On a new Mac, install the file again, set up the screen, and choose your skip time. Copying `init.lua` alone does not transfer the saved time or screen positions. Back up your local file if you make changes.
 
-At the top of `init.lua`, these controls are independent:
+User-reported working setup: **Stremio 5.1.28 · Hammerspoon 1.1.1 (6936) · macOS Tahoe 26.7**. Other versions may need adjustments.
 
-```lua
-local INITIAL_DISPLAY_DELAY = 1  -- Initial SKIP INTRO label
-local AUTO_SKIP_DELAY = 3       -- Three-second countdown
-local CHECK_INTERVAL = 4        -- Accessibility scan interval
-local SKIP_DISPLAY_DELAY = 2  -- SKIPPING... visual duration
-```
-
-Change one value, save, then choose **Reload Config**. The last number (`SKIP_DISPLAY_DELAY`) is set to 2 seconds in the supplied working script; adjust it to your preference.
-
-## Back up or move to another Mac
-
-Store **both** these project documents and your actual working script somewhere backed up (e.g. `iCloud Drive/Projects/StremioIntroSkip/`). The Mac reads only `~/.hammerspoon/init.lua`; the iCloud copy is a backup, not the runtime file.
-
-The target and seek-bar coordinates live separately under these `hs.settings` keys. Their legacy `onepace_` prefix is retained so existing installations keep their saved settings; it does not restrict which content you can use:
-
-- `onepace_skip_seconds`
-- `onepace_seek_start`
-- `onepace_seek_end`
-
-If you need to inspect them, open the **Hammerspoon Console** and run each expression below to see the current values:
-
-```lua
-print(hs.inspect({
-    seconds = hs.settings.get("onepace_skip_seconds"),
-    start = hs.settings.get("onepace_seek_start"),
-    finish = hs.settings.get("onepace_seek_end")
-}))
-```
-
-You can save the printed values privately alongside the backup, but **seek coordinates should normally be recalibrated on a different Mac or display**. Enable Hammerspoon's **Launch at Login** preference if you'd like the utility available automatically after a restart.
-
-## If an update breaks it
-
-Consult [PROJECT_STATE.md](PROJECT_STATE.md), especially **Implementation architecture**, **Constraints and design decisions**, and **Regression tests**. The key questions are whether Stremio still exposes current/duration values to Accessibility and whether clicking the calibrated native timeline still seeks. Don't replace the official player or add episode-identification logic unless a new requirement actually needs it.
+For technical details and maintenance, see [PROJECT_STATE.md](PROJECT_STATE.md).
