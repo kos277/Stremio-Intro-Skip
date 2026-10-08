@@ -29,7 +29,7 @@ The user confirmed the final implementation works **perfectly** after setting th
 
 ## Environment / dependencies
 
-- macOS desktop, official **Stremio 5.1.28**. Future Stremio versions **not verified**; macOS/Hammerspoon exact versions **not recorded**.
+- User-reported environment: **macOS Tahoe 26.7**, **Hammerspoon 1.1.1 (6936)**, and official **Stremio 5.1.28**. Future Stremio versions **not verified**.
 - [Hammerspoon](https://www.hammerspoon.org/), running with macOS **Accessibility permission**; `hs.canvas`, `hs.axuielement`, `hs.timer`, `hs.settings`, `hs.mouse`, `hs.eventtap`, `hs.application`, and `hs.dialog`.
 - Does **not** modify Stremio, its addons, the video file, streaming quality, or install an alternative Stremio fork.
 - Assumes one relevant fullscreen player on the calibrated display; seek-bar coordinates are absolute and may change with display or layout.

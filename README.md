@@ -2,7 +2,7 @@
 
 A small **Hammerspoon** utility that adds a Netflix-inspired **SKIP INTRO | ⚙** overlay to the **official Stremio 5 desktop app on macOS**. It automatically appears during the beginning of a video, counts down, and seeks to a user-configured time using Stremio's existing timeline. The official Stremio player is unchanged.
 
-**Documented stable baseline:** 1.0.0 (project documentation label), verified by the user on **Stremio 5.1.28**, October 2026. Hammerspoon/macOS versions were not recorded. See [PROJECT_STATE.md](PROJECT_STATE.md) for design decisions, architecture, limitations, and troubleshooting.
+**Documented stable baseline:** 1.0.0 (project documentation label), verified by the user on **Stremio 5.1.28**, October 2026. User-reported environment: **Hammerspoon 1.1.1 (6936)** and **macOS Tahoe 26.7**. See [PROJECT_STATE.md](PROJECT_STATE.md) for design decisions, architecture, limitations, and troubleshooting.
 
 > **Keep your own working `~/.hammerspoon/init.lua` as the primary source of truth.** The `init.lua` in this archive is a *reference reconstruction* from the latest shared code plus the confirmed final 2.5-second hide delay, not a byte-for-byte export from your Mac. Before replacing an already-working installation, back up and compare the local file.
 
