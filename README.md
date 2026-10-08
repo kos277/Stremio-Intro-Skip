@@ -2,7 +2,7 @@
 
 Automatically skip to your chosen intro endpoint in **Stremio on macOS**. A small **SKIP INTRO | ⚙** button lets you skip immediately or change the time.
 
-**New Mac?** Follow steps 1–3. **New screen or resolution?** Repeat step 2, then test with step 3.
+**New Mac?** Follow steps 1–3. **New screen or resolution?** Repeat step 2.
 
 ## 1. Install
 
@@ -32,19 +32,18 @@ end)
 ```
 
 2. Play a video in **fullscreen Stremio on the screen you’ll use**. Seek well past the intro so the skip button disappears. Move the mouse to show the playback bar.
-3. Point at the **far-left end of the playback bar** without clicking. Press **Control + Option + Command + 1**. You should see **Seek bar START saved**.
-4. Point at the **far-right end of the same bar** without clicking. Press **Control + Option + Command + 2**. You should see **Seek bar END saved**.
-5. Choose **Reload Config** again. This moves the skip button into position for your screen.
+3. Point at the **far-left end of the playback bar** without clicking. Press **Control + Option + Command + 1**.
+4. Point at the **far-right end of the same bar** without clicking. Press **Control + Option + Command + 2**.
+5. Choose **Reload Config** again.
 
 Use the long **video progress bar**, not the volume slider. You can leave the setup shortcuts in the file; next time you change screens, repeat steps 2–5. Don’t paste the block twice.
 
-## 3. Choose the time and test
+## 3. Choose the skip time
 
 1. With Stremio open, press **Control + Option + Command + E**.
 2. Enter the time where the intro ends, such as **1:42**, and click **Save**. This time is remembered and applies to all videos until you change it.
-3. Rewind to the beginning and let the video play. Within about four seconds, you should see **SKIP INTRO**, then **SKIP IN 3 → 2 → 1**. It should jump to your chosen time and hide.
 
-**That’s it.** Click the button to skip sooner, or click **⚙** to change the time. The endpoint is set by you; the script doesn’t find intro boundaries automatically.
+Click **SKIP INTRO** to skip immediately, or **⚙** to change the time.
 
 To start Hammerspoon automatically after restarting your Mac, enable **Launch at Login** in its preferences.
 
@@ -55,8 +54,6 @@ To start Hammerspoon automatically after restarting your Mac, enable **Launch at
 | It clicks the wrong place or skips to the wrong time | Repeat **step 2** on your current screen, then check your saved time with **Control + Option + Command + E**. |
 | No skip button | Keep Hammerspoon running, check its Accessibility permission, and choose **Reload Config**. Play a video longer than three minutes from the beginning with Stremio in front. |
 | An error appears when reloading | Open Hammerspoon’s **Console** and copy the error when asking for help. |
-
-On a new Mac, paste the script into **Open Config** again, set up the screen, and choose your skip time. Your saved time and screen positions don’t transfer with the code. Keep a backup of any changes you make.
 
 User-reported working setup: **Stremio 5.1.28 · Hammerspoon 1.1.1 (6936) · macOS Tahoe 26.7**. Other versions may need adjustments.
 
