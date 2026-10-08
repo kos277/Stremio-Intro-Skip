@@ -1,6 +1,5 @@
 -- ONE PACE SKIP INTRO
 -- Official Stremio 5.1.28 / macOS
--- Stable reference: countdown + skipping transition
 
 hs.dockicon.hide()
 
@@ -10,7 +9,7 @@ local target = settings.get("onepace_skip_seconds") or 102
 local AUTO_SKIP_DELAY = 3
 local INITIAL_DISPLAY_DELAY = 1
 local CHECK_INTERVAL = 4
-local SKIP_DISPLAY_DELAY = 2.5
+local SKIP_DISPLAY_DELAY = 2
 
 local editingTimestamp = false
 local scanInProgress = false
@@ -18,6 +17,8 @@ local countdownTimer = nil
 local countdownTextTimers = {}
 local countdownGeneration = 0
 local skipAlreadyTriggered = false
+
+-- Skipping transition
 local skipFinishing = false
 local skipFinishDeadline = 0
 local skipHideTimer = nil
@@ -68,7 +69,6 @@ end
 
 local function isStremioActive()
     local front = hs.application.frontmostApplication()
-
     return front ~= nil and front:name() == "Stremio"
 end
 
@@ -136,7 +136,7 @@ local function skipIntro()
 
             hs.timer.doAfter(0.35, function()
 
-                -- Avoid clicking another application if focus changed.
+                -- Do not click another application
                 if not isStremioActive() then
                     hs.mouse.absolutePosition(originalMousePosition)
                     return
@@ -314,7 +314,7 @@ skipUI[8] = {
 }
 
 -- ==========================================
--- COUNTDOWN / SKIPPING TRANSITION
+-- COUNTDOWN MANAGEMENT
 -- ==========================================
 
 local function setCountdownLabel(text)
@@ -322,6 +322,7 @@ local function setCountdownLabel(text)
 end
 
 local function cancelCountdown()
+
     countdownGeneration = countdownGeneration + 1
 
     if countdownTimer then
@@ -332,88 +333,145 @@ local function cancelCountdown()
     for _, timer in ipairs(countdownTextTimers) do
         timer:stop()
     end
+
     countdownTextTimers = {}
 
     setCountdownLabel("SKIP INTRO")
 end
 
--- Cleanup is scheduled before seeking and also has a monitor fallback.
+-- ==========================================
+-- SKIPPING TRANSITION
+-- WITH FAIL-SAFE CLEANUP
+-- ==========================================
+
 local function finishSkipTransition()
+
+    -- Stop any outstanding cleanup timer
     if skipHideTimer then
         skipHideTimer:stop()
         skipHideTimer = nil
     end
 
     skipFinishing = false
+
+    -- Always hide when transition finishes
     skipUI:hide()
+
+    -- Reset text while hidden
     setCountdownLabel("SKIP INTRO")
 end
 
 local function executeSkip()
-    if skipAlreadyTriggered or skipFinishing then return end
+
+    -- Prevent duplicate skips
+    if skipAlreadyTriggered or skipFinishing then
+        return
+    end
 
     cancelCountdown()
+
     skipAlreadyTriggered = true
     skipFinishing = true
-    skipFinishDeadline = hs.timer.secondsSinceEpoch() + SKIP_DISPLAY_DELAY
 
+    skipFinishDeadline =
+        hs.timer.secondsSinceEpoch() + SKIP_DISPLAY_DELAY
+
+    -- Show transition message
     setCountdownLabel("SKIPPING...")
 
+    -- Schedule cleanup BEFORE initiating the seek
     skipHideTimer = hs.timer.doAfter(
         SKIP_DISPLAY_DELAY,
         finishSkipTransition
     )
 
+    -- Execute existing working seek
     skipIntro()
 end
 
+-- ==========================================
+-- COUNTDOWN ANIMATION
+-- ==========================================
+
 local function scheduleCountdownText(delay, text, generation)
+
     local timer = hs.timer.doAfter(delay, function()
-        if generation ~= countdownGeneration then return end
+
+        if generation ~= countdownGeneration then
+            return
+        end
 
         if editingTimestamp
             or not countdownTimer
             or not skipUI:isShowing() then
+
             return
         end
+
         setCountdownLabel(text)
+
     end)
 
     table.insert(countdownTextTimers, timer)
 end
 
 local function startCountdown()
+
     if countdownTimer
         or skipAlreadyTriggered
         or skipFinishing
         or editingTimestamp
         or not isStremioActive()
         or not skipUI:isShowing() then
+
         return
     end
 
     local generation = countdownGeneration
+
+    -- Show normal button for one second
     setCountdownLabel("SKIP INTRO")
 
-    scheduleCountdownText(INITIAL_DISPLAY_DELAY, "SKIP IN 3", generation)
-    scheduleCountdownText(INITIAL_DISPLAY_DELAY + 1, "SKIP IN 2", generation)
-    scheduleCountdownText(INITIAL_DISPLAY_DELAY + 2, "SKIP IN 1", generation)
+    scheduleCountdownText(
+        INITIAL_DISPLAY_DELAY,
+        "SKIP IN 3",
+        generation
+    )
 
+    scheduleCountdownText(
+        INITIAL_DISPLAY_DELAY + 1,
+        "SKIP IN 2",
+        generation
+    )
+
+    scheduleCountdownText(
+        INITIAL_DISPLAY_DELAY + 2,
+        "SKIP IN 1",
+        generation
+    )
+
+    -- Automatically skip after countdown
     countdownTimer = hs.timer.doAfter(
         INITIAL_DISPLAY_DELAY + AUTO_SKIP_DELAY,
         function()
+
             countdownTimer = nil
-            if generation ~= countdownGeneration then return end
+
+            if generation ~= countdownGeneration then
+                return
+            end
 
             if editingTimestamp
                 or skipAlreadyTriggered
                 or not isStremioActive()
                 or not skipUI:isShowing() then
+
                 setCountdownLabel("SKIP INTRO")
                 return
             end
 
             executeSkip()
+
         end
     )
 end
@@ -426,7 +484,6 @@ local function editTimestamp()
 
     editingTimestamp = true
 
-    -- Stop countdown while editing
     cancelCountdown()
 
     local button, value = hs.dialog.textPrompt(
@@ -461,14 +518,11 @@ local function editTimestamp()
         hs.timer.doAfter(0.6, function()
 
             editingTimestamp = false
-
-            -- Recheck playback and start fresh countdown
             updateSkipVisibility()
 
         end)
 
     end)
-
 end
 
 -- ==========================================
@@ -571,51 +625,80 @@ hs.hotkey.bind({"ctrl", "alt", "cmd"}, "P", function()
 end)
 
 -- ==========================================
--- AUTOMATIC VISIBILITY WITH TRANSITION FAIL-SAFE
+-- AUTOMATIC VISIBILITY
+-- WITH TRANSITION FAIL-SAFE
 -- ==========================================
 
 local function setSkipVisibility(visible)
-    -- Never leave the overlay on top of other applications.
+
+    -- Always hide when Stremio is not active,
+    -- even during a skipping transition.
     if not isStremioActive() then
+
         if skipFinishing then
             finishSkipTransition()
         end
+
         cancelCountdown()
         skipAlreadyTriggered = false
+
         skipUI:hide()
         return
     end
 
-    -- Preserve the SKIPPING... state briefly, but never indefinitely.
+    -- Allow transition to remain visible briefly,
+    -- but never allow it to become permanently stuck.
     if skipFinishing then
+
         if hs.timer.secondsSinceEpoch() >= skipFinishDeadline then
             finishSkipTransition()
         else
             return
         end
+
     end
 
     if visible then
-        if skipAlreadyTriggered then return end
+
+        -- Prevent button reappearing during a seek
+        if skipAlreadyTriggered then
+            return
+        end
+
         if not skipUI:isShowing() then
             skipUI:show():bringToFront(true)
         end
+
         startCountdown()
+
     else
+
         cancelCountdown()
+
+        -- Reset for the next appearance
         skipAlreadyTriggered = false
+
         if skipUI:isShowing() then
+
             skipUI[2].action = "skip"
             skipUI[3].action = "skip"
+
             skipUI:hide()
         end
+
     end
 end
+
+-- ==========================================
+-- PLAYBACK MONITOR
+-- ORIGINAL WORKING DETECTION
+-- ==========================================
 
 updateSkipVisibility = function()
 
     if editingTimestamp then return end
 
+    -- Only monitor while Stremio is active
     if not isStremioActive() then
         setSkipVisibility(false)
         return
@@ -659,9 +742,9 @@ updateSkipVisibility = function()
                 table.insert(times, seconds)
 
             end
-
         end
 
+        -- Require exactly two timestamps
         if #times ~= 2 then
             setSkipVisibility(false)
             return
@@ -675,7 +758,7 @@ updateSkipVisibility = function()
             return
         end
 
-        -- Show only while inside the intro
+        -- Show only during the intro
         setSkipVisibility(current < target)
 
     end, function(element)

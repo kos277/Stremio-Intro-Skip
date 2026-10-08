@@ -6,14 +6,14 @@
 
 Add a comfortable Netflix-inspired skip-intro experience for **One Pace episodes** in official Stremio *without changing the native player or reducing video quality*. User-configured intros often end at different times for different runs of episodes; user must change skip endpoint quickly without editing Lua. The overlay should appear only during the intro; offer a brief opportunity to skip manually or change the time; automatically skip after a short countdown; look polished and disappear after seeking.
 
-The user confirmed the final implementation works **perfectly** after setting the `SKIPPING...` display delay to **2.5 seconds**. Treat the existing Mac installation as authoritative if it differs from a reconstructed reference file.
+The user supplied their actual working Lua script. It replaces the earlier reconstructed reference and uses a **2-second** `SKIPPING...` display delay. The earlier notes described 2.5 seconds; the supplied working script is authoritative for the current baseline.
 
 ## Stable behavior — confirmed
 
 1. Every **4 seconds**, while Stremio is foreground, an asynchronous macOS Accessibility search reads player time values. When exactly two parseable, distinct values are available, the smaller is taken as elapsed time and the larger as total duration. Basic validity guard: duration >= 180 seconds and greater than target.
 2. Overlay appears when `current < target`; hides after target or when Stremio isn't active. The overlay may reappear on rewinding into an intro, including in the same episode. No dedicated episode identity detection is necessary.
 3. When shown: **SKIP INTRO** (1 second) → **SKIP IN 3**, **SKIP IN 2**, **SKIP IN 1** (one second each) → automatic skip.
-4. During the seek, show **SKIPPING...** for **2.5 seconds**. This is an aesthetic *fixed delay*, not a signal from Stremio that playback has resumed.
+4. During the seek, show **SKIPPING...** for **2 seconds**. This is an aesthetic *fixed delay*, not a signal from Stremio that playback has resumed.
 5. Clicking the primary button manually triggers the same seek; clicking the cog opens an editable `m:ss` / `h:mm:ss` timestamp dialog, pauses the countdown, and restores focus to Stremio afterward. Edited value persists across restarts. Keyboard shortcut can open editor even while overlay is hidden.
 6. On skip, Hammerspoon moves the pointer to reveal the timeline, searches duration, computes `fraction = targetSeconds / durationSeconds`, calculates an X coordinate between saved start/end timeline positions, clicks the calibrated seek bar, and restores the original pointer location shortly afterward.
 7. Pending countdown steps are cancelled on edit/hide. `skipAlreadyTriggered` prevents a second automatic skip while seeking. `skipFinishing`, a retained one-shot cleanup timer, an absolute deadline and the foreground-application check prevent `SKIPPING...` getting stuck onscreen.
@@ -39,7 +39,7 @@ The user confirmed the final implementation works **perfectly** after setting th
 | File / key | Responsibility |
 | --- | --- |
 | `~/.hammerspoon/init.lua` | **Actual live script on the user's Mac. Source of truth.** |
-| `init.lua` (this package) | Reference copy reconstructed from the latest code shared in chat and the confirmed `SKIP_DISPLAY_DELAY = 2.5`. Compare with live file before restoring. |
+| `init.lua` (this package) | Working script supplied by the user, preserved unchanged with `SKIP_DISPLAY_DELAY = 2`. Compare with any newer local edits before restoring. |
 | `README.md` | Installation, calibration, backup, usage, shortcuts |
 | `PROJECT_STATE.md` | Current state, design rationale, regressions, upgrade guidance |
 | `hs.settings` `onepace_skip_seconds` | User-selected target in seconds; fallback `102` = `1:42` only when setting missing |
@@ -54,10 +54,10 @@ These settings **are not backed up by copying the script alone**.
 local AUTO_SKIP_DELAY = 3
 local INITIAL_DISPLAY_DELAY = 1
 local CHECK_INTERVAL = 4
-local SKIP_DISPLAY_DELAY = 2.5
+local SKIP_DISPLAY_DELAY = 2
 ```
 
-The 1 + 3 second display cycle starts **when the accessibility monitor detects the intro**, potentially up to roughly four seconds into the episode. `SKIPPING...` lasts another 2.5 seconds after skip is initiated; actual seek completion is **not** polled or confirmed by the overlay.
+The 1 + 3 second display cycle starts **when the accessibility monitor detects the intro**, potentially up to roughly four seconds into the episode. `SKIPPING...` lasts another 2 seconds after skip is initiated; actual seek completion is **not** polled or confirmed by the overlay.
 
 ## Implementation architecture
 
@@ -79,7 +79,7 @@ The 1 + 3 second display cycle starts **when the accessibility monitor detects t
 - **No reliance on AniSkip**: One Pace re-edits mean community timestamps for original One Piece episodes may not line up. A manually adjustable global target is the desired workflow.
 - **Minimal monitoring**: 4-second Accessibility scan; one-shot UI/countdown/cleanup timers; no image recognition, video processing, background server, or episode metadata database.
 - **No episode title/ID detection**: A previous attempt over-engineered this, broke automatic skipping, and was explicitly rejected. The stable solution uses existing `current < target` visibility behavior.
-- **Fixed 2.5-second visual transition**: User preferred longer persistence of the `SKIPPING...` state because Stremio needs a moment to seek and resume.
+- **Fixed 2-second visual transition**: User preferred longer persistence of the `SKIPPING...` state because Stremio needs a moment to seek and resume.
 
 **Rejected or superseded:**
 
@@ -98,12 +98,12 @@ The 1 + 3 second display cycle starts **when the accessibility monitor detects t
 - The absolute seek click requires recalibration on changed monitor/layout/fullscreen geometry.
 - Rewinding below target may re-trigger automatic skip. This is a deliberate consequence of the minimal design, not an episode-specific guard.
 - `SKIPPING...` visibility uses a fixed timer, not an actual playback-resumed event. No requirement to implement costly state detection.
-- The reference `init.lua` in this package was reconstructed from conversation code; the locally tested copy has not been exported from the user's Mac for byte comparison.
+- The repository now contains the user-supplied working script; runtime behavior has not been independently verified in the Linux cloud environment.
 
 ## Regression tests (after any edits or Stremio updates)
 
 1. **Startup and fullscreen**: Hammerspoon config reloads without Lua errors; overlay appears on a playing intro, correctly positioned above the right end of timeline.
-2. **Countdown**: Show `SKIP INTRO` ~1 second → `SKIP IN 3` / `2` / `1` → automatic seek → `SKIPPING...` ~2.5 seconds → hides.
+2. **Countdown**: Show `SKIP INTRO` ~1 second → `SKIP IN 3` / `2` / `1` → automatic seek → `SKIPPING...` ~2 seconds → hides.
 3. **Seek accuracy**: On the currently configured episode, actual playback lands near the saved target; no mistaken volume clicks or loss of subtitles/video quality.
 4. **Mouse restoration**: After skip, mouse returns to its original location.
 5. **Edit**: Cog opens dialog during intro; countdown stops; save a different target; dialog closes; button remains as appropriate and new countdown uses the new target. Test cancel too.
@@ -115,7 +115,7 @@ The 1 + 3 second display cycle starts **when the accessibility monitor detects t
 
 ## Maintenance workflow for a future developer / ChatGPT conversation
 
-1. Read **this file and `README.md`**, then obtain the **actual current** `~/.hammerspoon/init.lua` from the user. Do not assume a reference copy is still current.
+1. Read **this file and `README.md`** and the repository’s `init.lua`. Before modifying an existing installation, check whether the user has made newer local edits to `~/.hammerspoon/init.lua`.
 2. Ask for the symptom, Stremio version, Hammerspoon Console errors, what Ctrl+Option+Command+P displays, and whether fullscreen seek-bar coordinates changed. Prefer focused diagnostics over rewriting the entire script.
 3. Preserve proven design/behavior; modify **only the relevant block**. Avoid speculative episode detection, external video players, and changing multiple mechanisms simultaneously.
 4. Keep the stable baseline backed up before edits; after each change, run the regression checklist.
@@ -128,4 +128,4 @@ The 1 + 3 second display cycle starts **when the accessibility monitor detects t
 - Added editable persistent target, pointer restoration, auto show/hide before target, polished Netflix-like compact UI.
 - Added automatic 1 + 3-second countdown using the existing detection/seek pipeline; removed unsuccessful episode-detection experiment.
 - Added `SKIPPING...` state and fixed stale/stuck overlay behavior by retained hide timer, deadline fallback and foreground override.
-- **Current stable baseline:** `SKIP_DISPLAY_DELAY = 2.5`; user confirmed desired appearance and behavior.
+- **Current stable baseline:** user-supplied working `init.lua`, with `SKIP_DISPLAY_DELAY = 2`, replaces the reconstructed reference.

@@ -4,7 +4,7 @@ A small **Hammerspoon** utility that adds a Netflix-inspired **SKIP INTRO | ⚙*
 
 **Documented stable baseline:** 1.0.0 (project documentation label), verified by the user on **Stremio 5.1.28**, October 2026. User-reported environment: **Hammerspoon 1.1.1 (6936)** and **macOS Tahoe 26.7**. See [PROJECT_STATE.md](PROJECT_STATE.md) for design decisions, architecture, limitations, and troubleshooting.
 
-> **Keep your own working `~/.hammerspoon/init.lua` as the primary source of truth.** The `init.lua` in this archive is a *reference reconstruction* from the latest shared code plus the confirmed final 2.5-second hide delay, not a byte-for-byte export from your Mac. Before replacing an already-working installation, back up and compare the local file.
+> **Keep your own working `~/.hammerspoon/init.lua` as the primary source of truth.** The repository’s `init.lua` is the working script supplied by the user, with a 2-second hide delay. Before replacing an already-working installation, back up and compare the local file.
 
 ## How to install or restore
 
@@ -47,7 +47,7 @@ The start position should be to the left of the end position. Recalibrate after 
 
 - At the start of a video, the button appears when playback is **before your configured intro endpoint**. Detection occurs on a **4-second interval**.
 - It displays **SKIP INTRO** for ~1 second, then **SKIP IN 3 → 2 → 1** for one second each; clicking the main area skips immediately.
-- At the end of the countdown, it seeks automatically and displays **SKIPPING...** for **2.5 seconds** before hiding. The 2.5 seconds is a fixed visual delay, *not* playback-completion detection.
+- At the end of the countdown, it seeks automatically and displays **SKIPPING...** for **2 seconds** before hiding. The 2 seconds is a fixed visual delay, *not* playback-completion detection.
 - Click the **⚙ cog** to edit the target (e.g. `1:42`, `2:30`, `3:15`). The countdown is suspended during editing and restarts after returning to Stremio.
 - The target is remembered across restarts. The current target **might not** be `1:42`; that is only the *initial fallback* when no value has been saved.
 - The overlay hides when the intro is over or Stremio isn't the foreground application. Rewinding into the intro can trigger the auto-skip sequence again; the code does **not** identify episodes by title.
@@ -69,10 +69,10 @@ At the top of `init.lua`, these controls are independent:
 local INITIAL_DISPLAY_DELAY = 1  -- Initial SKIP INTRO label
 local AUTO_SKIP_DELAY = 3       -- Three-second countdown
 local CHECK_INTERVAL = 4        -- Accessibility scan interval
-local SKIP_DISPLAY_DELAY = 2.5  -- SKIPPING... visual duration
+local SKIP_DISPLAY_DELAY = 2  -- SKIPPING... visual duration
 ```
 
-Change one value, save, then choose **Reload Config**. The last number (`SKIP_DISPLAY_DELAY`) is the confirmed final preference; `1.2` seconds was judged too short.
+Change one value, save, then choose **Reload Config**. The last number (`SKIP_DISPLAY_DELAY`) is set to 2 seconds in the supplied working script; adjust it to your preference.
 
 ## Back up or move to another Mac
 
