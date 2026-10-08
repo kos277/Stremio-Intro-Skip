@@ -16,27 +16,12 @@ Automatically skip to your chosen intro endpoint in **Stremio on macOS**. A smal
 
 Do this once for each new Mac, screen, resolution, or display layout. You’ll mark both ends of Stremio’s playback bar so the script knows where to click.
 
-1. Click Hammerspoon’s menu bar icon → **Open Config**. Paste the block below at the **bottom** of the existing code, press **Command + S**, then choose **Reload Config** from the same menu.
+1. Play a video in **fullscreen Stremio on the screen you’ll use**. Seek well past the intro so the skip button disappears. Move the mouse to show the playback bar.
+2. Point at the **far-left end of the playback bar** without clicking. Press **Control + Option + Command + 1**.
+3. Point at the **far-right end of the same bar** without clicking. Press **Control + Option + Command + 2**.
+4. Click Hammerspoon’s menu bar icon → **Reload Config**.
 
-```lua
--- Screen setup shortcuts
-hs.hotkey.bind({"ctrl", "alt", "cmd"}, "1", function()
-    hs.settings.set("onepace_seek_start", hs.mouse.absolutePosition())
-    hs.alert.show("Seek bar START saved")
-end)
-
-hs.hotkey.bind({"ctrl", "alt", "cmd"}, "2", function()
-    hs.settings.set("onepace_seek_end", hs.mouse.absolutePosition())
-    hs.alert.show("Seek bar END saved")
-end)
-```
-
-2. Play a video in **fullscreen Stremio on the screen you’ll use**. Seek well past the intro so the skip button disappears. Move the mouse to show the playback bar.
-3. Point at the **far-left end of the playback bar** without clicking. Press **Control + Option + Command + 1**.
-4. Point at the **far-right end of the same bar** without clicking. Press **Control + Option + Command + 2**.
-5. Choose **Reload Config** again.
-
-Use the long **video progress bar**, not the volume slider. You can leave the setup shortcuts in the file; next time you change screens, repeat steps 2–5. Don’t paste the block twice.
+Use the long **video progress bar**, not the volume slider. The screen setup shortcuts are included in the script.
 
 ## 3. Choose the skip time
 

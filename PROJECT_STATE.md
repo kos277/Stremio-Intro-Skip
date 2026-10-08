@@ -39,7 +39,7 @@ The user supplied their actual working Lua script. It replaces the earlier recon
 | File / key | Responsibility |
 | --- | --- |
 | `~/.hammerspoon/init.lua` | **Actual live script on the user's Mac. Source of truth.** |
-| `init.lua` (this package) | Working script supplied by the user, with project naming updated in its header and `SKIP_DISPLAY_DELAY = 2`. Compare with any newer local edits before restoring. |
+| `init.lua` (this package) | Working script supplied by the user, with project naming updated, built-in screen calibration shortcuts, and `SKIP_DISPLAY_DELAY = 2`. Compare with any newer local edits before restoring. |
 | `README.md` | Installation, calibration, backup, usage, shortcuts |
 | `PROJECT_STATE.md` | Current state, design rationale, regressions, upgrade guidance |
 | `hs.settings` `onepace_skip_seconds` | User-selected target in seconds; fallback `102` = `1:42` only when setting missing |
@@ -68,7 +68,7 @@ The 1 + 3 second display cycle starts **when the accessibility monitor detects t
 - **Seek (`skipIntro`)**: holds original mouse position, retrieves saved calibration, exposes timeline by moving cursor, queries duration, clicks `start.x + (end.x - start.x) * target/duration` at calibrated Y, then restores pointer.
 - **Transition**: `executeSkip()` cancels countdown, locks duplicate seeks, shows `SKIPPING...`, schedules retained `skipHideTimer`, then calls `skipIntro()`. `finishSkipTransition()` always hides the overlay and resets text. A monitor-time deadline fallback is present, and leaving Stremio must always hide the overlay.
 - **Edit**: `hs.dialog.textPrompt`, saves `hs.settings.set("onepace_skip_seconds", seconds)`; returns focus via `hs.application.get("Stremio"):activate()`; resumes playback visibility check afterward.
-- **Debug**: Ctrl+Option+Command+P prints currently exposed timestamps; E edits; 0 temporarily toggles overlay.
+- **Shortcuts**: Ctrl+Option+Command+1 / 2 save seek-bar start / end at the pointer position; reload config afterward to reposition the overlay. P shows currently exposed timestamps; E edits; 0 temporarily toggles overlay.
 
 ## Constraints and design decisions
 
@@ -129,3 +129,5 @@ The 1 + 3 second display cycle starts **when the accessibility monitor detects t
 - Added automatic 1 + 3-second countdown using the existing detection/seek pipeline; removed unsuccessful episode-detection experiment.
 - Added `SKIPPING...` state and fixed stale/stuck overlay behavior by retained hide timer, deadline fallback and foreground override.
 - **Current stable baseline:** user-supplied working `init.lua`, with `SKIP_DISPLAY_DELAY = 2`, replaces the reconstructed reference.
+
+- Included screen calibration shortcuts in `init.lua` so setup requires only one code paste. Existing saved-setting keys and playback behavior are preserved.

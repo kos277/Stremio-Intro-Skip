@@ -789,3 +789,14 @@ updateSkipVisibility()
 
 -- Edit shortcut
 hs.hotkey.bind({"ctrl", "alt", "cmd"}, "E", editTimestamp)
+
+-- Screen setup shortcuts
+hs.hotkey.bind({"ctrl", "alt", "cmd"}, "1", function()
+    hs.settings.set("onepace_seek_start", hs.mouse.absolutePosition())
+    hs.alert.show("Seek bar START saved")
+end)
+
+hs.hotkey.bind({"ctrl", "alt", "cmd"}, "2", function()
+    hs.settings.set("onepace_seek_end", hs.mouse.absolutePosition())
+    hs.alert.show("Seek bar END saved")
+end)
