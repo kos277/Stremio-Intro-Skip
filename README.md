@@ -8,15 +8,15 @@ Automatically skip to your chosen intro endpoint in **Stremio on macOS**. A smal
 
 1. Install [Stremio for macOS](https://www.stremio.com/downloads) and [Hammerspoon](https://www.hammerspoon.org/).
 2. Open Hammerspoon. Allow it under **System Settings → Privacy & Security → Accessibility**. Quit and reopen Hammerspoon if prompted.
-3. Open [init.lua](init.lua) here on GitHub and click **Download raw file** near the top-right of the file. Keep the filename **init.lua**.
-4. In Finder, press **Command + Shift + G**, enter `~/.hammerspoon`, and put the downloaded file in that folder. Create the folder if needed. **Back up an existing `init.lua` before replacing it.** If it contains other Hammerspoon tools, merge this script instead.
-5. Click Hammerspoon’s menu bar icon → **Reload Config**. Keep Hammerspoon running.
+3. Open [init.lua](init.lua) here on GitHub and copy all the code using the **Copy raw file** button.
+4. Click Hammerspoon’s icon in the **top menu bar** → **Open Config**. Paste the code into the editor and press **Command + S** to save. If there’s existing code, save a backup first; keep any other Hammerspoon tools you use.
+5. Click the same Hammerspoon menu → **Reload Config**. Keep Hammerspoon running.
 
 ## 2. Set up your screen
 
 Do this once for each new Mac, screen, resolution, or display layout. You’ll mark both ends of Stremio’s playback bar so the script knows where to click.
 
-1. Click Hammerspoon’s menu bar icon → **Open Config**. Paste the block below at the **bottom** of `init.lua`, save, then choose **Reload Config**.
+1. Click Hammerspoon’s menu bar icon → **Open Config**. Paste the block below at the **bottom** of the existing code, press **Command + S**, then choose **Reload Config** from the same menu.
 
 ```lua
 -- Screen setup shortcuts
@@ -56,7 +56,7 @@ To start Hammerspoon automatically after restarting your Mac, enable **Launch at
 | No skip button | Keep Hammerspoon running, check its Accessibility permission, and choose **Reload Config**. Play a video longer than three minutes from the beginning with Stremio in front. |
 | An error appears when reloading | Open Hammerspoon’s **Console** and copy the error when asking for help. |
 
-On a new Mac, install the file again, set up the screen, and choose your skip time. Copying `init.lua` alone does not transfer the saved time or screen positions. Back up your local file if you make changes.
+On a new Mac, paste the script into **Open Config** again, set up the screen, and choose your skip time. Your saved time and screen positions don’t transfer with the code. Keep a backup of any changes you make.
 
 User-reported working setup: **Stremio 5.1.28 · Hammerspoon 1.1.1 (6936) · macOS Tahoe 26.7**. Other versions may need adjustments.
 
