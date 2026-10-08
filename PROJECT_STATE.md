@@ -1,10 +1,10 @@
-# PROJECT_STATE — One Pace Skip Intro
+# PROJECT_STATE — Stremio Intro Skip
 
 **Status:** Functional, user-tested stable baseline. **Project reference version:** `1.0.0` (documentation label, not a formal published release). **Last confirmed:** 2026-10-07. **Target application:** official macOS **Stremio 5.1.28**. **Implementation:** Hammerspoon Lua (`~/.hammerspoon/init.lua`).
 
 ## Purpose and acceptance criteria — confirmed
 
-Add a comfortable Netflix-inspired skip-intro experience for **One Pace episodes** in official Stremio *without changing the native player or reducing video quality*. User-configured intros often end at different times for different runs of episodes; user must change skip endpoint quickly without editing Lua. The overlay should appear only during the intro; offer a brief opportunity to skip manually or change the time; automatically skip after a short countdown; look polished and disappear after seeking.
+Add a comfortable Netflix-inspired skip-intro experience for **any supported video** in official Stremio *without changing the native player or reducing video quality*. User-configured intros often end at different times for different runs of episodes; user must change skip endpoint quickly without editing Lua. The overlay should appear only during the intro; offer a brief opportunity to skip manually or change the time; automatically skip after a short countdown; look polished and disappear after seeking.
 
 The user supplied their actual working Lua script. It replaces the earlier reconstructed reference and uses a **2-second** `SKIPPING...` display delay. The earlier notes described 2.5 seconds; the supplied working script is authoritative for the current baseline.
 
@@ -39,14 +39,14 @@ The user supplied their actual working Lua script. It replaces the earlier recon
 | File / key | Responsibility |
 | --- | --- |
 | `~/.hammerspoon/init.lua` | **Actual live script on the user's Mac. Source of truth.** |
-| `init.lua` (this package) | Working script supplied by the user, preserved unchanged with `SKIP_DISPLAY_DELAY = 2`. Compare with any newer local edits before restoring. |
+| `init.lua` (this package) | Working script supplied by the user, with project naming updated in its header and `SKIP_DISPLAY_DELAY = 2`. Compare with any newer local edits before restoring. |
 | `README.md` | Installation, calibration, backup, usage, shortcuts |
 | `PROJECT_STATE.md` | Current state, design rationale, regressions, upgrade guidance |
 | `hs.settings` `onepace_skip_seconds` | User-selected target in seconds; fallback `102` = `1:42` only when setting missing |
 | `hs.settings` `onepace_seek_start` | Absolute `{x, y}` timeline start calibration |
 | `hs.settings` `onepace_seek_end` | Absolute `{x, y}` timeline end calibration |
 
-These settings **are not backed up by copying the script alone**.
+These settings **are not backed up by copying the script alone**. The legacy `onepace_` key prefix is retained for compatibility with saved timestamps and calibration; it has no effect on content support.
 
 ## Timing parameters (confirmed final)
 
@@ -76,7 +76,7 @@ The 1 + 3 second display cycle starts **when the accessibility monitor detects t
 
 - **Official Stremio only.** User explicitly rejected switching to alternative desktop clients/ports after Stremio Enhanced looked noticeably more washed out/compressed than native playback when compared on the exact same frame.
 - **Hammerspoon overlay, not a Stremio addon.** Fullscreen overlay and calibrated click seeking were empirically tested; they work on the user's setup.
-- **No reliance on AniSkip**: One Pace re-edits mean community timestamps for original One Piece episodes may not line up. A manually adjustable global target is the desired workflow.
+- **Content-independent operation**: No show-specific logic, addon integration, or external timestamp database. A manually adjustable global endpoint drives automatic skipping; intro boundaries are not detected automatically.
 - **Minimal monitoring**: 4-second Accessibility scan; one-shot UI/countdown/cleanup timers; no image recognition, video processing, background server, or episode metadata database.
 - **No episode title/ID detection**: A previous attempt over-engineered this, broke automatic skipping, and was explicitly rejected. The stable solution uses existing `current < target` visibility behavior.
 - **Fixed 2-second visual transition**: User preferred longer persistence of the `SKIPPING...` state because Stremio needs a moment to seek and resume.

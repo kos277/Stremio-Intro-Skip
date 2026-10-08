@@ -1,6 +1,6 @@
-# One Pace Skip Intro — macOS / official Stremio
+# Stremio Intro Skip — macOS / official Stremio
 
-A small **Hammerspoon** utility that adds a Netflix-inspired **SKIP INTRO | ⚙** overlay to the **official Stremio 5 desktop app on macOS**. It automatically appears during the beginning of a video, counts down, and seeks to a user-configured time using Stremio's existing timeline. The official Stremio player is unchanged.
+A small **Hammerspoon** utility that adds a Netflix-inspired **SKIP INTRO | ⚙** overlay to the **official Stremio 5 desktop app on macOS**. It automatically appears during the beginning of a video, counts down, and seeks to a user-configured time using Stremio's existing timeline. It works independently of the show or content source and skips automatically after setup. You choose the intro endpoint; the script does not detect intro boundaries. The official Stremio player is unchanged.
 
 **Documented stable baseline:** 1.0.0 (project documentation label), verified by the user on **Stremio 5.1.28**, October 2026. User-reported environment: **Hammerspoon 1.1.1 (6936)** and **macOS Tahoe 26.7**. See [PROJECT_STATE.md](PROJECT_STATE.md) for design decisions, architecture, limitations, and troubleshooting.
 
@@ -76,9 +76,9 @@ Change one value, save, then choose **Reload Config**. The last number (`SKIP_DI
 
 ## Back up or move to another Mac
 
-Store **both** these project documents and your actual working script somewhere backed up (e.g. `iCloud Drive/Projects/OnePaceSkipIntro/`). The Mac reads only `~/.hammerspoon/init.lua`; the iCloud copy is a backup, not the runtime file.
+Store **both** these project documents and your actual working script somewhere backed up (e.g. `iCloud Drive/Projects/StremioIntroSkip/`). The Mac reads only `~/.hammerspoon/init.lua`; the iCloud copy is a backup, not the runtime file.
 
-The target and seek-bar coordinates live separately under these `hs.settings` keys:
+The target and seek-bar coordinates live separately under these `hs.settings` keys. Their legacy `onepace_` prefix is retained so existing installations keep their saved settings; it does not restrict which content you can use:
 
 - `onepace_skip_seconds`
 - `onepace_seek_start`
@@ -98,4 +98,4 @@ You can save the printed values privately alongside the backup, but **seek coord
 
 ## If an update breaks it
 
-Consult [PROJECT_STATE.md](PROJECT_STATE.md), especially **Architecture**, **Invariants**, and **Regression tests**. The key questions are whether Stremio still exposes current/duration values to Accessibility and whether clicking the calibrated native timeline still seeks. Don't replace the official player or add episode-identification logic unless a new requirement actually needs it.
+Consult [PROJECT_STATE.md](PROJECT_STATE.md), especially **Implementation architecture**, **Constraints and design decisions**, and **Regression tests**. The key questions are whether Stremio still exposes current/duration values to Accessibility and whether clicking the calibrated native timeline still seeks. Don't replace the official player or add episode-identification logic unless a new requirement actually needs it.

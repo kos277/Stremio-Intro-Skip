@@ -1,4 +1,4 @@
--- ONE PACE SKIP INTRO
+-- STREMIO INTRO SKIP
 -- Official Stremio 5.1.28 / macOS
 
 hs.dockicon.hide()
